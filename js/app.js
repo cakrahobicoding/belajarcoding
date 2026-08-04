@@ -109,6 +109,12 @@ const KM = (() => {
     return users[uname] || null;
   }
 
+  function getUserByName(username) {
+    if (!username) return null;
+    const users = getUsers();
+    return users[username.toLowerCase()] || null;
+  }
+
   function updateCurrentUser(patch) {
     const uname = localStorage.getItem(SESSION_KEY);
     if (!uname) return;
@@ -211,7 +217,7 @@ const KM = (() => {
   return {
     THEME_PRESETS, seed, register, login, logout, currentUser, updateCurrentUser,
     getComments, saveComments, getUpMateri, saveUpMateri,
-    escapeHtml, timeAgo, applyTheme, initials, renderNavbar, getUsers,
+    escapeHtml, timeAgo, applyTheme, initials, renderNavbar, getUsers, getUserByName,
   };
 })();
 

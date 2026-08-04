@@ -40,9 +40,9 @@ function renderQA() {
       return `
         <div class="qa-item" style="border-top:none;padding:0;">
           <div class="qa-item-head">
-            <span class="qa-avatar" style="width:28px;height:28px;font-size:0.7rem;${qaAvatarStyle(ru)}">${ru && ru.pfp ? '' : KM.initials(r.author)}</span>
+            <a href="profile.html?user=${encodeURIComponent(r.author)}" class="qa-avatar" style="width:28px;height:28px;font-size:0.7rem;${qaAvatarStyle(ru)}">${ru && ru.pfp ? '' : KM.initials(r.author)}</a>
             <div class="qa-meta">
-              <span class="qa-name">${KM.escapeHtml(r.author)} ${ru && ru.isAdmin ? '<span class="badge-admin">ADMIN</span>' : ''}</span>
+              <span class="qa-name"><a href="profile.html?user=${encodeURIComponent(r.author)}" class="qa-name-link">${KM.escapeHtml(r.author)}</a> ${ru && ru.isAdmin ? '<span class="badge-admin">ADMIN</span>' : ''}</span>
               <span class="qa-time">${KM.timeAgo(r.date)}</span>
             </div>
           </div>
@@ -54,9 +54,9 @@ function renderQA() {
     return `
       <div class="qa-item" data-id="${c.id}">
         <div class="qa-item-head">
-          <span class="qa-avatar" style="${qaAvatarStyle(author)}">${author && author.pfp ? '' : KM.initials(c.author)}</span>
+          <a href="profile.html?user=${encodeURIComponent(c.author)}" class="qa-avatar" style="${qaAvatarStyle(author)}">${author && author.pfp ? '' : KM.initials(c.author)}</a>
           <div class="qa-meta">
-            <span class="qa-name">${KM.escapeHtml(c.author)} ${author && author.isAdmin ? '<span class="badge-admin">ADMIN</span>' : ''}</span>
+            <span class="qa-name"><a href="profile.html?user=${encodeURIComponent(c.author)}" class="qa-name-link">${KM.escapeHtml(c.author)}</a> ${author && author.isAdmin ? '<span class="badge-admin">ADMIN</span>' : ''}</span>
             <span class="qa-time">${KM.timeAgo(c.date)}</span>
           </div>
         </div>
