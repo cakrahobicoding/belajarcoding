@@ -223,6 +223,11 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   color: var(--text); padding: 12px 14px; font-size: 0.9rem;
 }
 .qa-composer{ display:flex; flex-direction:column; gap: 10px; margin-bottom: 22px; }
+.qa-posting-as{
+  display:flex; align-items:center; gap:10px; font-size: 0.82rem; color: var(--text-dim);
+}
+.qa-posting-as .qa-avatar{ width:26px; height:26px; font-size:0.7rem; }
+.qa-posting-as b{ color: var(--text); }
 .qa-composer-foot{ display:flex; justify-content: space-between; align-items:center; }
 .qa-locked{
   border: 1px dashed var(--border); border-radius: var(--radius); padding: 18px;
@@ -232,15 +237,20 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
 .qa-item{ border-top: 1px solid var(--border-soft); padding: 18px 0; }
 .qa-item:first-child{ border-top:none; padding-top:0; }
+.qa-eyebrow{
+  font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.05em;
+  color: var(--accent-primary); margin-bottom: 8px; font-weight: 700;
+}
 .qa-item-head{ display:flex; align-items:center; gap:10px; margin-bottom: 8px; }
 .qa-avatar{
   width: 34px; height:34px; border-radius: 50%; flex-shrink:0;
   display:flex; align-items:center; justify-content:center; font-family: var(--font-mono);
   font-weight:700; font-size: 0.8rem; color:#0b0e14; background: var(--user-accent);
   background-size: cover; background-position: center;
+  border: 2px solid var(--border-soft);
 }
 .qa-meta{ display:flex; flex-direction:column; line-height:1.25; }
-.qa-name{ font-weight:600; font-size: 0.88rem; display:flex; align-items:center; gap:6px; }
+.qa-name{ font-weight:700; font-size: 0.94rem; display:flex; align-items:center; gap:6px; }
 .qa-name-link{ color: var(--text); }
 .qa-name-link:hover{ color: var(--user-accent); text-decoration: underline; }
 .qa-name .badge-admin{
