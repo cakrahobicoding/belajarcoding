@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KodeMulai — Belajar Programmer & Coding dari Nol</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="navbar-root"></div>
+
+<header class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow">STATUS: SERVER SIAP MENGAJAR</div>
+      <h1>Belajar <span class="hl">coding</span> dari terminal kosong sampai jadi programmer.</h1>
+      <p>Materi HTML, CSS, JavaScript, Git, dan Python yang ringkas, plus kolom tanya‑jawab tempat sesama pembelajar (dan admin) saling bantu jawab.</p>
+      <div class="hero-actions">
+        <a href="#materi" class="btn btn-primary">Mulai Belajar</a>
+        <a href="#qa" class="btn btn-ghost">Lihat Tanya Jawab</a>
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+        <span class="terminal-title">sensei@kodemulai: ~</span>
+      </div>
+      <div class="terminal-body">
+        <div class="line"><span class="prompt">$</span> <span class="typed">npm create belajar-coding@latest</span></div>
+        <div class="line out">✔ Materi HTML <span class="k">terpasang</span></div>
+        <div class="line out">✔ Materi CSS <span class="k">terpasang</span></div>
+        <div class="line out">✔ Materi JavaScript <span class="k">terpasang</span></div>
+        <div class="line out">✔ Kolom Tanya Jawab <span class="s">aktif</span></div>
+        <div class="line out">→ Siap, Sensei! Yuk mulai. ٩(◕‿◕)۶</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="section" id="materi">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">01 · MATERI</div>
+      <h2>Pilih bahasa, mulai dari dasar</h2>
+      <p>Klik salah satu kartu untuk buka penjelasan singkat + contoh kode. Bisa ditambah "up materi" sendiri lewat halaman profil.</p>
+    </div>
+
+    <div class="materi-grid" id="materi-grid">
+      <!-- HTML -->
+      <div class="materi-card" style="--card-accent:var(--accent-html)" data-materi="html">
+        <div class="logo-badge html">&lt;/&gt;</div>
+        <div>
+          <h3>HTML</h3>
+          <div class="tag">struktur halaman web</div>
+        </div>
+        <p>Fondasi dari setiap website. Belajar tag, elemen, dan cara menyusun konten halaman.</p>
+        <span class="card-link">Buka materi →</span>
+      </div>
+      <!-- CSS -->
+      <div class="materi-card" style="--card-accent:var(--accent-css)" data-materi="css">
+        <div class="logo-badge css">{ }</div>
+        <div>
+          <h3>CSS</h3>
+          <div class="tag">gaya & tata letak</div>
+        </div>
+        <p>Mengubah HTML polos jadi tampilan menarik: warna, jarak, layout, dan animasi.</p>
+        <span class="card-link">Buka materi →</span>
+      </div>
+      <!-- JS -->
+      <div class="materi-card" style="--card-accent:var(--accent-js)" data-materi="js">
+        <div class="logo-badge js">JS</div>
+        <div>
+          <h3>JavaScript</h3>
+          <div class="tag">interaktivitas</div>
+        </div>
+        <p>Bikin halaman merespons klik, input, dan mengubah tampilan secara dinamis.</p>
+        <span class="card-link">Buka materi →</span>
+      </div>
+      <!-- Git -->
+      <div class="materi-card" style="--card-accent:#a78bfa" data-materi="git">
+        <div class="logo-badge git">git</div>
+        <div>
+          <h3>Git & GitHub</h3>
+          <div class="tag">version control</div>
+        </div>
+        <p>Cara menyimpan riwayat perubahan kode dan upload project ke GitHub.</p>
+        <span class="card-link">Buka materi →</span>
+      </div>
+      <!-- Python -->
+      <div class="materi-card" style="--card-accent:#6fcf97" data-materi="python">
+        <div class="logo-badge py">py</div>
+        <div>
+          <h3>Python</h3>
+          <div class="tag">bahasa serbaguna</div>
+        </div>
+        <p>Sintaks yang gampang dibaca, cocok untuk pemula sebelum belajar bahasa lain.</p>
+        <span class="card-link">Buka materi →</span>
+      </div>
+      <!-- Terminal -->
+      <div class="materi-card" style="--card-accent:#8b92a5" data-materi="terminal">
+        <div class="logo-badge term">$_</div>
+        <div>
+          <h3>Terminal / CLI</h3>
+          <div class="tag">command line</div>
+        </div>
+        <p>Perintah dasar buat navigasi folder, jalankan script, dan install package.</p>
+        <span class="card-link">Buka materi →</span>
+      </div>
+    </div>
+
+    <div id="materi-detail-slot"></div>
+  </div>
+</section>
+
+<section class="section" id="qa">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">02 · TANYA JAWAB</div>
+      <h2>Ada yang bingung? Tanya di sini 🤔</h2>
+      <p>Semua pengguna yang sudah login (termasuk admin) bisa menjawab pertanyaan siapa pun.</p>
+    </div>
+
+    <div class="qa-box">
+      <div id="qa-locked" class="qa-locked" style="display:none;">
+        Kamu harus <a href="login.html">masuk</a> atau <a href="register.html">buat akun</a> dulu untuk bertanya / menjawab, Sensei~
+      </div>
+
+      <div id="qa-composer" class="qa-composer" style="display:none;">
+        <textarea id="qa-input" placeholder="Tulis pertanyaan seputar HTML, CSS, JS, atau apapun soal coding..."></textarea>
+        <div class="qa-composer-foot">
+          <span style="color:var(--text-faint);font-size:0.8rem;">Bersikaplah sopan ya~ 🍡</span>
+          <button class="btn btn-primary btn-sm" id="qa-submit">Kirim Pertanyaan</button>
+        </div>
+      </div>
+
+      <div id="qa-list"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>&lt;/&gt; KodeMulai — dibuat buat belajar bareng, bukan buat production sungguhan~</p>
+    <p id="footer-year"></p>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+<script src="js/materi.js"></script>
+<script src="js/comments.js"></script>
+<script>
+  KM.renderNavbar('belajar');
+  document.getElementById('footer-year').textContent = '© ' + new Date().getFullYear();
+</script>
+</body>
+</html>

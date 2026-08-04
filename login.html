@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masuk — KodeMulai</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="navbar-root"></div>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="logo-row"><span class="brand-badge">&lt;/&gt;</span> KodeMulai</div>
+    <h1>Selamat datang lagi</h1>
+    <p class="sub">Masuk untuk bisa isi Q&A dan buka profil kamu~</p>
+
+    <div class="form-msg" id="msg"></div>
+
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" type="text" autocomplete="username" placeholder="username kamu">
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+    </div>
+
+    <button class="btn btn-primary btn-block" id="btn-login">Masuk</button>
+
+    <div class="auth-switch">
+      Belum punya akun? <a href="register.html">Buat akun</a>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  KM.renderNavbar('');
+
+  const msg = document.getElementById('msg');
+  function showMsg(text, ok) {
+    msg.textContent = text;
+    msg.className = 'form-msg show ' + (ok ? 'ok' : 'err');
+  }
+
+  document.getElementById('btn-login').addEventListener('click', () => {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    const res = KM.login(u, p);
+    if (res.ok) {
+      showMsg('Berhasil masuk! Mengalihkan... ehehe~', true);
+      setTimeout(() => location.href = 'index.html', 600);
+    } else {
+      showMsg(res.msg, false);
+    }
+  });
+
+  document.getElementById('password').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('btn-login').click();
+  });
+</script>
+</body>
+</html>
