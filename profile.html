@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil — KodeMulai</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="navbar-root"></div>
+
+<div id="not-logged-in" class="container" style="display:none;padding-top:60px;text-align:center;">
+  <p style="color:var(--text-dim);margin-bottom:16px;">Kamu belum masuk, Sensei. Silakan masuk dulu buat lihat profil~</p>
+  <a href="login.html" class="btn btn-primary">Masuk</a>
+</div>
+
+<div id="profile-root" style="display:none;">
+  <div class="container" style="padding-top:26px;">
+    <div class="profile-banner" id="profile-banner"></div>
+    <div class="profile-head">
+      <div class="profile-pfp" id="profile-pfp"></div>
+      <div class="profile-info">
+        <h2 id="profile-name">username <span class="admin-badge-nav" id="profile-admin-badge" style="display:none;">ADMIN</span></h2>
+        <div class="profile-username" id="profile-handle">@username</div>
+      </div>
+    </div>
+    <p class="profile-bio" id="profile-bio">Belum ada bio.</p>
+
+    <div class="profile-tabs" id="profile-tabs">
+      <div class="profile-tab active" data-tab="aktivitas">Aktivitas</div>
+      <div class="profile-tab" data-tab="up-materi">Up Materi</div>
+      <div class="profile-tab" data-tab="pengaturan" id="tab-btn-pengaturan">Pengaturan Profil</div>
+    </div>
+  </div>
+
+  <!-- TAB: Aktivitas (pertanyaan & jawaban milik profil ini) -->
+  <div class="container tab-panel" id="tab-aktivitas">
+    <div id="aktivitas-list" style="margin-top:22px;"></div>
+  </div>
+
+  <!-- TAB: Up Materi -->
+  <div class="container tab-panel" id="tab-up-materi" style="display:none;">
+    <div class="qa-composer" id="up-materi-composer" style="margin-top:22px;">
+      <input id="up-title" placeholder="Judul materi (mis. Trik CSS Grid)" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:10px 13px;">
+      <textarea id="up-content" placeholder="Isi penjelasan singkatnya..."></textarea>
+      <div class="qa-composer-foot">
+        <span style="color:var(--text-faint);font-size:0.8rem;">Materi ini akan tampil di profil kamu~</span>
+        <button class="btn btn-primary btn-sm" id="btn-up-materi">Upload Materi</button>
+      </div>
+    </div>
+    <div class="up-materi-list" id="up-materi-list"></div>
+  </div>
+
+  <!-- TAB: Pengaturan -->
+  <div class="container tab-panel" id="tab-pengaturan" style="display:none;">
+    <div class="settings-grid">
+      <div class="settings-card">
+        <h4>Foto Profil & Banner</h4>
+        <div class="field">
+          <label for="input-pfp">URL Foto Profil</label>
+          <input id="input-pfp" placeholder="https://.../foto.jpg">
+        </div>
+        <div class="field">
+          <label for="input-banner">URL Gambar Banner</label>
+          <input id="input-banner" placeholder="https://.../banner.jpg">
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h4>Bio</h4>
+        <div class="field">
+          <label for="input-bio">Ceritakan tentang kamu</label>
+          <textarea id="input-bio" style="width:100%;min-height:90px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:10px 13px;"></textarea>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h4>Warna Tema Profil</h4>
+        <p style="color:var(--text-dim);font-size:0.85rem;">Kayak custom role color di Discord — pilih warna aksen profil kamu.</p>
+        <div class="swatches" id="theme-swatches"></div>
+      </div>
+
+      <div class="settings-card">
+        <h4>Simpan Perubahan</h4>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:14px;">Semua perubahan tersimpan di browser kamu.</p>
+        <button class="btn btn-primary btn-block" id="btn-save-profile">Simpan Profil</button>
+        <div style="height:10px;"></div>
+        <button class="btn btn-danger btn-block" id="btn-logout-2">Keluar Akun</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <p>&lt;/&gt; KodeMulai — dibuat buat belajar bareng, bukan buat production sungguhan~</p>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+<script src="js/profile.js"></script>
+</body>
+</html>
