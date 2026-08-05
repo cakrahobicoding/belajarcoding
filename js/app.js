@@ -1,21 +1,12 @@
 /* ============================================================
    KodeMulai — app.js
-   Inti aplikasi: manajemen "database" via localStorage.
-
-   ⚠️ PENTING (baca README):
-   Ini murni demo sisi-klien (client-side only). Semua data
-   (akun, password, komentar) tersimpan di localStorage browser
-   MASING-MASING pengguna — TIDAK ada server / database asli,
-   jadi data TIDAK sinkron antar perangkat/pengguna lain.
-   Untuk versi production yang layak dipakai publik di Vercel,
-   ini wajib diganti dengan backend asli (lihat README.md).
+   Inti aplikasi. Semua data (akun, komentar, up-materi) tersimpan
+   di database SQLite di VPS kamu sendiri, diakses lewat REST API
+   (lihat js/api-config.js dan folder server/).
    ============================================================ */
 
 const KM = (() => {
-  const USERS_KEY = 'km_users';
-  const SESSION_KEY = 'km_session';
-  const COMMENTS_KEY = 'km_comments';
-  const UPMATERI_KEY = 'km_up_materi';
+  const TOKEN_KEY = 'km_token';
 
   const THEME_PRESETS = [
     { name: 'Periwinkle', value: '#7c9eff' },
@@ -27,116 +18,129 @@ const KM = (() => {
     { name: 'Rose',       value: '#ff6b9d' },
   ];
 
-  // Hash string sederhana (BUKAN kriptografi aman — hanya demo, jangan pakai di production)
-  function simpleHash(str) {
-    let h = 0;
-    for (let i = 0; i < str.length; i++) {
-      h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+  let cachedUser = null;
+
+  async function api(path, options = {}) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    let res;
+    try {
+      res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    } catch (e) {
+      throw new Error('Nggak bisa menghubungi server. Cek API_BASE di js/api-config.js dan pastikan backend-nya jalan~');
     }
-    return 'h' + Math.abs(h).toString(36) + str.length;
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Request gagal (${res.status})`);
+    return data;
   }
 
-  function getUsers() {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-  }
-  function saveUsers(users) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  }
-
-  function seed() {
-    const users = getUsers();
-    if (!users['ran']) {
-      users['ran'] = {
-        username: 'ran',
-        passwordHash: simpleHash('ransukacoding'),
-        isAdmin: true,
-        bio: 'Admin & pembuat KodeMulai. Jaga sopan santun di kolom Q&A ya~ 🍵',
-        banner: '',
-        pfp: '',
-        theme: '#f4d35e',
-        joined: Date.now(),
-      };
-      saveUsers(users);
+  async function register(username, password) {
+    try {
+      await api('/api/register', { method: 'POST', body: JSON.stringify({ username, password }) });
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, msg: e.message };
     }
   }
 
-  function register(username, password) {
-    username = username.trim().toLowerCase();
-    if (!/^[a-z0-9_]{3,20}$/.test(username)) {
-      return { ok: false, msg: 'Username 3-20 karakter, hanya huruf/angka/underscore ya, Sensei!' };
+  async function login(username, password) {
+    try {
+      const data = await api('/api/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+      localStorage.setItem(TOKEN_KEY, data.token);
+      cachedUser = data.user;
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, msg: e.message };
     }
-    if (password.length < 6) {
-      return { ok: false, msg: 'Password minimal 6 karakter, Baka! Jangan asal-asalan.' };
-    }
-    const users = getUsers();
-    if (users[username]) {
-      return { ok: false, msg: 'Username itu sudah dipakai. Coba yang lain~' };
-    }
-    users[username] = {
-      username,
-      passwordHash: simpleHash(password),
-      isAdmin: false,
-      bio: '',
-      banner: '',
-      pfp: '',
-      theme: '#7c9eff',
-      joined: Date.now(),
-    };
-    saveUsers(users);
-    return { ok: true };
   }
 
-  function login(username, password) {
-    username = username.trim().toLowerCase();
-    const users = getUsers();
-    const u = users[username];
-    if (!u || u.passwordHash !== simpleHash(password)) {
-      return { ok: false, msg: 'Username atau password salah. Coba lagi, Sensei!' };
-    }
-    localStorage.setItem(SESSION_KEY, username);
-    return { ok: true };
-  }
-
-  function logout() {
-    localStorage.removeItem(SESSION_KEY);
+  async function logout() {
+    try { await api('/api/logout', { method: 'POST' }); } catch (e) { /* abaikan */ }
+    localStorage.removeItem(TOKEN_KEY);
     location.href = 'index.html';
   }
 
+  async function refreshCurrentUser() {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) { cachedUser = null; return null; }
+    try {
+      const data = await api('/api/me');
+      cachedUser = data.user;
+    } catch (e) {
+      localStorage.removeItem(TOKEN_KEY);
+      cachedUser = null;
+    }
+    return cachedUser;
+  }
+
   function currentUser() {
-    const uname = localStorage.getItem(SESSION_KEY);
-    if (!uname) return null;
-    const users = getUsers();
-    return users[uname] || null;
+    return cachedUser;
   }
 
-  function getUserByName(username) {
-    if (!username) return null;
-    const users = getUsers();
-    return users[username.toLowerCase()] || null;
+  async function getUserByName(username) {
+    try {
+      const data = await api(`/api/users/${encodeURIComponent(username.toLowerCase())}`);
+      return data.user;
+    } catch (e) {
+      return null;
+    }
   }
 
-  function updateCurrentUser(patch) {
-    const uname = localStorage.getItem(SESSION_KEY);
-    if (!uname) return;
-    const users = getUsers();
-    users[uname] = { ...users[uname], ...patch };
-    saveUsers(users);
+  async function getUsersMap() {
+    const data = await api('/api/users');
+    return data.users;
   }
 
-  function getComments() {
-    return JSON.parse(localStorage.getItem(COMMENTS_KEY) || '[]');
-  }
-  function saveComments(list) {
-    localStorage.setItem(COMMENTS_KEY, JSON.stringify(list));
+  async function updateCurrentUser(patch) {
+    const data = await api('/api/users/me', { method: 'PATCH', body: JSON.stringify(patch) });
+    cachedUser = data.user;
   }
 
-  function getUpMateri() {
-    return JSON.parse(localStorage.getItem(UPMATERI_KEY) || '[]');
-  }
-  function saveUpMateri(list) {
-    localStorage.setItem(UPMATERI_KEY, JSON.stringify(list));
+  // ---------- Komentar (Q&A) ----------
+  // Tidak ada websocket di sini (biar backend tetap simpel) — dipoll tiap
+  // beberapa detik biar tetap kelihatan "hampir realtime" ke semua user.
+  function listenComments(callback, intervalMs = 4000) {
+    let stopped = false;
+    async function tick() {
+      if (stopped) return;
+      try {
+        const data = await api('/api/comments');
+        callback(data.comments);
+      } catch (e) { /* diamkan, coba lagi di tick berikutnya */ }
+      if (!stopped) setTimeout(tick, intervalMs);
+    }
+    tick();
+    return () => { stopped = true; };
   }
 
+  async function fetchCommentsOnce() {
+    const data = await api('/api/comments');
+    return data.comments;
+  }
+
+  async function addComment(author, text) {
+    await api('/api/comments', { method: 'POST', body: JSON.stringify({ text }) });
+  }
+
+  async function addReply(commentId, reply) {
+    await api(`/api/comments/${encodeURIComponent(commentId)}/replies`, {
+      method: 'POST', body: JSON.stringify({ text: reply.text }),
+    });
+  }
+
+  // ---------- Up Materi ----------
+  async function getUpMateriByAuthor(username) {
+    const data = await api(`/api/up-materi?author=${encodeURIComponent(username)}`);
+    return data.upMateri;
+  }
+
+  async function addUpMateri(author, title, content) {
+    await api('/api/up-materi', { method: 'POST', body: JSON.stringify({ title, content }) });
+  }
+
+  // ---------- Util ----------
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str ?? '';
@@ -214,16 +218,19 @@ const KM = (() => {
     if (logoutBtn) logoutBtn.addEventListener('click', logout);
   }
 
-  return {
-    THEME_PRESETS, seed, register, login, logout, currentUser, updateCurrentUser,
-    getComments, saveComments, getUpMateri, saveUpMateri,
-    escapeHtml, timeAgo, applyTheme, initials, renderNavbar, getUsers, getUserByName,
-  };
-})();
+  // Dipanggil sekali di tiap halaman sebelum render apapun.
+  async function boot(activeNav) {
+    await refreshCurrentUser();
+    renderNavbar(activeNav);
+    const u = currentUser();
+    if (u && u.theme) applyTheme(u.theme);
+  }
 
-// Seed admin account + apply saved theme on every page load
-KM.seed();
-(() => {
-  const u = KM.currentUser();
-  if (u && u.theme) KM.applyTheme(u.theme);
+  return {
+    THEME_PRESETS, boot, register, login, logout, refreshCurrentUser, currentUser, updateCurrentUser,
+    getUserByName, getUsersMap,
+    listenComments, fetchCommentsOnce, addComment, addReply,
+    getUpMateriByAuthor, addUpMateri,
+    escapeHtml, timeAgo, applyTheme, initials, renderNavbar,
+  };
 })();

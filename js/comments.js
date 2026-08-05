@@ -1,6 +1,10 @@
 /* ============================================================
-   comments.js — kolom Tanya Jawab (butuh login untuk isi)
+   comments.js — kolom Tanya Jawab, realtime via Firestore.
+   Semua pengguna (siapapun yang buka halaman ini) langsung
+   lihat pertanyaan & jawaban baru tanpa perlu refresh.
    ============================================================ */
+
+let qaUsersMap = {};
 
 function qaAvatarStyle(user) {
   if (!user) return 'background:var(--accent-primary)';
@@ -9,49 +13,27 @@ function qaAvatarStyle(user) {
     : `background:${user.theme || 'var(--accent-primary)'}`;
 }
 
-function renderQA() {
+function renderQAList(comments) {
   const list = document.getElementById('qa-list');
-  const locked = document.getElementById('qa-locked');
-  const composer = document.getElementById('qa-composer');
-  const postingAs = document.getElementById('qa-posting-as');
   if (!list) return;
-
-  const me = KM.currentUser();
-  const users = KM.getUsers();
-
-  if (me) {
-    locked.style.display = 'none';
-    composer.style.display = 'flex';
-    if (postingAs) {
-      postingAs.innerHTML = `
-        <a href="profile.html?user=${encodeURIComponent(me.username)}" class="qa-avatar" style="${qaAvatarStyle(me)}">${me.pfp ? '' : KM.initials(me.username)}</a>
-        Bertanya sebagai <b>${KM.escapeHtml(me.username)}</b>${me.isAdmin ? ' <span class="badge-admin">ADMIN</span>' : ''}
-      `;
-    }
-  } else {
-    locked.style.display = 'block';
-    composer.style.display = 'none';
-  }
-
-  const comments = KM.getComments().slice().sort((a, b) => b.date - a.date);
 
   if (comments.length === 0) {
     list.innerHTML = `<div class="empty-state">Belum ada pertanyaan. Jadilah yang pertama bertanya, Sensei! ≧﹏≦</div>`;
     return;
   }
 
+  const me = KM.currentUser();
+
   list.innerHTML = comments.map(c => {
-    const author = users[c.author];
+    const author = qaUsersMap[c.author];
     const repliesHtml = (c.replies || []).map(r => {
-      const ru = users[r.author];
-      const replyColor = (ru && ru.theme) || 'var(--success)';
+      const ru = qaUsersMap[r.author];
       return `
         <div class="qa-item" style="border-top:none;padding:0;">
-          <div class="qa-eyebrow" style="color:var(--success);">✔ JAWABAN</div>
           <div class="qa-item-head">
             <a href="profile.html?user=${encodeURIComponent(r.author)}" class="qa-avatar" style="width:28px;height:28px;font-size:0.7rem;${qaAvatarStyle(ru)}">${ru && ru.pfp ? '' : KM.initials(r.author)}</a>
             <div class="qa-meta">
-              <span class="qa-name"><a href="profile.html?user=${encodeURIComponent(r.author)}" class="qa-name-link" style="color:${replyColor};">${KM.escapeHtml(r.author)}</a> ${ru && ru.isAdmin ? '<span class="badge-admin">ADMIN</span>' : ''}</span>
+              <span class="qa-name"><a href="profile.html?user=${encodeURIComponent(r.author)}" class="qa-name-link">${KM.escapeHtml(r.author)}</a> ${ru && ru.isAdmin ? '<span class="badge-admin">ADMIN</span>' : ''}</span>
               <span class="qa-time">${KM.timeAgo(r.date)}</span>
             </div>
           </div>
@@ -60,14 +42,12 @@ function renderQA() {
       `;
     }).join('');
 
-    const authorColor = (author && author.theme) || 'var(--user-accent)';
     return `
       <div class="qa-item" data-id="${c.id}">
-        <div class="qa-eyebrow">🙋 PERTANYAAN</div>
         <div class="qa-item-head">
           <a href="profile.html?user=${encodeURIComponent(c.author)}" class="qa-avatar" style="${qaAvatarStyle(author)}">${author && author.pfp ? '' : KM.initials(c.author)}</a>
           <div class="qa-meta">
-            <span class="qa-name"><a href="profile.html?user=${encodeURIComponent(c.author)}" class="qa-name-link" style="color:${authorColor};">${KM.escapeHtml(c.author)}</a> ${author && author.isAdmin ? '<span class="badge-admin">ADMIN</span>' : ''}</span>
+            <span class="qa-name"><a href="profile.html?user=${encodeURIComponent(c.author)}" class="qa-name-link">${KM.escapeHtml(c.author)}</a> ${author && author.isAdmin ? '<span class="badge-admin">ADMIN</span>' : ''}</span>
             <span class="qa-time">${KM.timeAgo(c.date)}</span>
           </div>
         </div>
@@ -95,35 +75,52 @@ function renderQA() {
   }).join('');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+async function initQA() {
   const list = document.getElementById('qa-list');
+  const locked = document.getElementById('qa-locked');
+  const composer = document.getElementById('qa-composer');
+  const postingAs = document.getElementById('qa-posting-as');
   const submitBtn = document.getElementById('qa-submit');
   const input = document.getElementById('qa-input');
   if (!list) return;
 
-  renderQA();
+  const me = KM.currentUser();
+
+  if (me) {
+    locked.style.display = 'none';
+    composer.style.display = 'flex';
+    postingAs.innerHTML = `
+      <a href="profile.html?user=${encodeURIComponent(me.username)}" class="qa-avatar" style="${qaAvatarStyle(me)}">${me.pfp ? '' : KM.initials(me.username)}</a>
+      Bertanya sebagai <b>${KM.escapeHtml(me.username)}</b>${me.isAdmin ? ' <span class="badge-admin">ADMIN</span>' : ''}
+    `;
+  } else {
+    locked.style.display = 'block';
+    composer.style.display = 'none';
+  }
+
+  // Ambil daftar user dulu (buat avatar/nama), lalu pasang listener realtime komentar
+  qaUsersMap = await KM.getUsersMap();
+  list.innerHTML = `<div class="empty-state">Memuat pertanyaan... 🍵</div>`;
+  KM.listenComments(renderQAList);
 
   if (submitBtn) {
-    submitBtn.addEventListener('click', () => {
-      const me = KM.currentUser();
-      if (!me) return;
+    submitBtn.addEventListener('click', async () => {
+      const currentMe = KM.currentUser();
+      if (!currentMe) return;
       const text = input.value.trim();
       if (!text) return;
-      const comments = KM.getComments();
-      comments.push({
-        id: 'q' + Date.now(),
-        author: me.username,
-        text,
-        date: Date.now(),
-        replies: [],
-      });
-      KM.saveComments(comments);
-      input.value = '';
-      renderQA();
+      submitBtn.disabled = true;
+      try {
+        await KM.addComment(currentMe.username, text);
+        input.value = '';
+      } catch (e) {
+        alert('Gagal mengirim pertanyaan, coba lagi ya~ (' + e.message + ')');
+      }
+      submitBtn.disabled = false;
     });
   }
 
-  list.addEventListener('click', (e) => {
+  list.addEventListener('click', async (e) => {
     const replyBtn = e.target.closest('.btn-reply');
     const sendBtn = e.target.closest('.btn-send-reply');
     const cancelBtn = e.target.closest('.btn-cancel-reply');
@@ -139,21 +136,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (sendBtn) {
-      const me = KM.currentUser();
-      if (!me) return;
+      const currentMe = KM.currentUser();
+      if (!currentMe) return;
       const id = sendBtn.dataset.id;
       const form = document.getElementById(`reply-form-${id}`);
       const textarea = form.querySelector('textarea');
       const text = textarea.value.trim();
       if (!text) return;
-      const comments = KM.getComments();
-      const target = comments.find(c => c.id === id);
-      if (target) {
-        target.replies = target.replies || [];
-        target.replies.push({ author: me.username, text, date: Date.now() });
-        KM.saveComments(comments);
-        renderQA();
+      sendBtn.disabled = true;
+      try {
+        await KM.addReply(id, { author: currentMe.username, text, date: Date.now() });
+        textarea.value = '';
+        form.classList.remove('open');
+      } catch (err) {
+        alert('Gagal mengirim jawaban, coba lagi ya~ (' + err.message + ')');
       }
+      sendBtn.disabled = false;
     }
   });
-});
+}
