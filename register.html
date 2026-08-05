@@ -39,35 +39,41 @@
   </div>
 </div>
 
+<script src="js/api-config.js"></script>
 <script src="js/app.js"></script>
 <script>
-  KM.renderNavbar('');
+  (async () => {
+    await KM.boot('');
 
-  const msg = document.getElementById('msg');
-  function showMsg(text, ok) {
-    msg.textContent = text;
-    msg.className = 'form-msg show ' + (ok ? 'ok' : 'err');
-  }
-
-  document.getElementById('btn-register').addEventListener('click', () => {
-    const u = document.getElementById('username').value;
-    const p = document.getElementById('password').value;
-    const p2 = document.getElementById('password2').value;
-
-    if (p !== p2) {
-      showMsg('Password sama ulangannya harus sama dong, Baka! 😤', false);
-      return;
+    const msg = document.getElementById('msg');
+    function showMsg(text, ok) {
+      msg.textContent = text;
+      msg.className = 'form-msg show ' + (ok ? 'ok' : 'err');
     }
 
-    const res = KM.register(u, p);
-    if (res.ok) {
-      const login = KM.login(u, p);
-      showMsg('Akun berhasil dibuat! Mengalihkan ke profil kamu~', true);
-      setTimeout(() => location.href = 'profile.html', 700);
-    } else {
-      showMsg(res.msg, false);
-    }
-  });
+    const registerBtn = document.getElementById('btn-register');
+    registerBtn.addEventListener('click', async () => {
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+      const p2 = document.getElementById('password2').value;
+
+      if (p !== p2) {
+        showMsg('Password sama ulangannya harus sama dong, Baka! 😤', false);
+        return;
+      }
+
+      registerBtn.disabled = true;
+      const res = await KM.register(u, p);
+      if (res.ok) {
+        await KM.login(u, p);
+        showMsg('Akun berhasil dibuat! Mengalihkan ke profil kamu~', true);
+        setTimeout(() => location.href = 'profile.html', 700);
+      } else {
+        showMsg(res.msg, false);
+        registerBtn.disabled = false;
+      }
+    });
+  })();
 </script>
 </body>
 </html>

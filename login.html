@@ -35,31 +35,37 @@
   </div>
 </div>
 
+<script src="js/api-config.js"></script>
 <script src="js/app.js"></script>
 <script>
-  KM.renderNavbar('');
+  (async () => {
+    await KM.boot('');
 
-  const msg = document.getElementById('msg');
-  function showMsg(text, ok) {
-    msg.textContent = text;
-    msg.className = 'form-msg show ' + (ok ? 'ok' : 'err');
-  }
-
-  document.getElementById('btn-login').addEventListener('click', () => {
-    const u = document.getElementById('username').value;
-    const p = document.getElementById('password').value;
-    const res = KM.login(u, p);
-    if (res.ok) {
-      showMsg('Berhasil masuk! Mengalihkan... ehehe~', true);
-      setTimeout(() => location.href = 'index.html', 600);
-    } else {
-      showMsg(res.msg, false);
+    const msg = document.getElementById('msg');
+    function showMsg(text, ok) {
+      msg.textContent = text;
+      msg.className = 'form-msg show ' + (ok ? 'ok' : 'err');
     }
-  });
 
-  document.getElementById('password').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('btn-login').click();
-  });
+    const loginBtn = document.getElementById('btn-login');
+    loginBtn.addEventListener('click', async () => {
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+      loginBtn.disabled = true;
+      const res = await KM.login(u, p);
+      loginBtn.disabled = false;
+      if (res.ok) {
+        showMsg('Berhasil masuk! Mengalihkan... ehehe~', true);
+        setTimeout(() => location.href = 'index.html', 600);
+      } else {
+        showMsg(res.msg, false);
+      }
+    });
+
+    document.getElementById('password').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') loginBtn.click();
+    });
+  })();
 </script>
 </body>
 </html>
