@@ -1,10 +1,3 @@
-/* ============================================================
-   chat.js — DM (pesan langsung), realtime via polling.
-   Composer pesan sengaja dipisah dari area bubble yang di-poll,
-   jadi ketikan yang sedang berjalan tidak pernah ke-reset
-   (pelajaran dari bug yang sama di Q&A).
-   ============================================================ */
-
 let usersMap = {};
 let activePartner = null;
 let stopPolling = null;
@@ -32,6 +25,7 @@ async function boot() {
 
   usersMap = await KM.getUsersMap();
   await refreshConversationList();
+  renderAllUsersList();
 
   const params = new URLSearchParams(location.search);
   const targetUser = params.get('user');
@@ -43,7 +37,6 @@ async function boot() {
 
   wireComposer();
   wireWallpaper();
-  wireNewChat();
 }
 
 async function refreshConversationList() {
@@ -184,19 +177,29 @@ function wireComposer() {
   });
 }
 
-function wireNewChat() {
-  const input = document.getElementById('chat-new-input');
-  const btn = document.getElementById('chat-new-btn');
+function renderAllUsersList() {
+  const me = KM.currentUser();
+  const wrap = document.getElementById('chat-users-items');
+  const others = Object.values(usersMap).filter(u => u.username !== me.username);
 
-  async function go() {
-    const username = input.value.trim().toLowerCase();
-    if (!username) return;
-    await openChat(username);
-    input.value = '';
+  if (others.length === 0) {
+    wrap.innerHTML = `<div class="empty-state" style="padding:20px 16px;">Belum ada user lain yang daftar~</div>`;
+    return;
   }
 
-  btn.addEventListener('click', go);
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+  wrap.innerHTML = others.map(u => `
+    <div class="chat-list-item" data-user="${u.username}">
+      <span class="qa-avatar" style="width:38px;height:38px;font-size:0.8rem;${chatAvatarStyle(u)}">${u.pfp ? '' : KM.initials(u.username)}</span>
+      <div style="overflow:hidden;">
+        <div class="cl-name">${KM.escapeHtml(u.username)}${u.isAdmin ? ' <span class="badge-admin">ADMIN</span>' : ''}</div>
+        <div class="cl-preview">Klik buat mulai chat</div>
+      </div>
+    </div>
+  `).join('');
+
+  wrap.querySelectorAll('.chat-list-item').forEach(el => {
+    el.addEventListener('click', () => openChat(el.dataset.user));
+  });
 }
 
 function wireWallpaper() {
