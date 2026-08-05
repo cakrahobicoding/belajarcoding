@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — KodeMulai</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="navbar-root"></div>
+
+<div id="not-logged-in" class="container" style="display:none;padding-top:60px;text-align:center;">
+  <p style="color:var(--text-dim);margin-bottom:16px;">Kamu belum masuk, Sensei. Silakan masuk dulu buat buka Dashboard~</p>
+  <a href="login.html" class="btn btn-primary">Masuk</a>
+</div>
+
+<div id="dash-root" style="display:none;">
+  <div class="container" style="padding-top:32px;">
+    <div class="dash-welcome">
+      <div class="qa-avatar" id="dash-avatar" style="width:52px;height:52px;font-size:1.1rem;"></div>
+      <div>
+        <h2 style="font-family:var(--font-display);font-size:1.2rem;" id="dash-greeting">Halo!</h2>
+        <p style="color:var(--text-dim);font-size:0.88rem;">Selamat belajar hari ini~ 🍵</p>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <aside class="dash-side">
+        <h4>Menu Cepat</h4>
+        <ul>
+          <li><a href="index.html">📘 Materi Belajar</a></li>
+          <li><a href="chat.html">💬 Chat / DM</a></li>
+          <li><a href="profile.html">👤 Profil Saya</a></li>
+        </ul>
+      </aside>
+
+      <div>
+        <div class="section-head" style="margin-bottom:16px;">
+          <div class="eyebrow">TANYA JAWAB</div>
+          <h2>Ada yang bingung? Tanya di sini 🤔</h2>
+          <p>Semua pengguna yang login (termasuk admin) bisa menjawab pertanyaan siapa pun.</p>
+        </div>
+
+        <div class="qa-box">
+          <div id="qa-locked" class="qa-locked" style="display:none;">
+            Kamu harus <a href="login.html">masuk</a> dulu untuk bertanya / menjawab, Sensei~
+          </div>
+          <div id="qa-composer" class="qa-composer" style="display:none;">
+            <div class="qa-posting-as" id="qa-posting-as"></div>
+            <textarea id="qa-input" placeholder="Tulis pertanyaan seputar HTML, CSS, JS, atau apapun soal coding..."></textarea>
+            <div class="qa-composer-foot">
+              <span style="color:var(--text-faint);font-size:0.8rem;">Bersikaplah sopan ya~ 🍡</span>
+              <button class="btn btn-primary btn-sm" id="qa-submit">Kirim Pertanyaan</button>
+            </div>
+          </div>
+          <div id="qa-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <p>&lt;/&gt; KodeMulai — dibuat buat belajar bareng, bukan buat production sungguhan~</p>
+  </div>
+</footer>
+
+<script src="js/api-config.js"></script>
+<script src="js/app.js"></script>
+<script src="js/comments.js"></script>
+<script>
+  (async () => {
+    await KM.boot('dashboard');
+    const me = KM.currentUser();
+    if (!me) {
+      document.getElementById('not-logged-in').style.display = 'block';
+      return;
+    }
+    document.getElementById('dash-root').style.display = 'block';
+
+    const avatar = document.getElementById('dash-avatar');
+    avatar.style.background = me.pfp ? `url('${me.pfp}') center/cover` : (me.theme || 'var(--user-accent)');
+    avatar.textContent = me.pfp ? '' : KM.initials(me.username);
+    document.getElementById('dash-greeting').textContent = `Halo, ${me.username}!`;
+
+    await initQA();
+  })();
+</script>
+</body>
+</html>
