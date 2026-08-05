@@ -43,6 +43,10 @@ async function initProfilePage() {
   if (isOwner) {
     renderThemeSwatches();
     fillSettingsForm();
+  } else if (me) {
+    const btn = document.getElementById('btn-message-user');
+    btn.style.display = 'inline-flex';
+    btn.href = `chat.html?user=${encodeURIComponent(viewedUser.username)}`;
   }
   wireEvents();
 }
@@ -97,9 +101,34 @@ function renderThemeSwatches() {
 }
 
 function fillSettingsForm() {
-  document.getElementById('input-pfp').value = viewedUser.pfp || '';
-  document.getElementById('input-banner').value = viewedUser.banner || '';
   document.getElementById('input-bio').value = viewedUser.bio || '';
+  const previewPfp = document.getElementById('preview-pfp');
+  const previewBanner = document.getElementById('preview-banner');
+  if (previewPfp) previewPfp.style.backgroundImage = viewedUser.pfp ? `url('${viewedUser.pfp}')` : 'none';
+  if (previewBanner) previewBanner.style.backgroundImage = viewedUser.banner ? `url('${viewedUser.banner}')` : 'none';
+}
+
+async function handleImageUpload(fileInput, field, previewEl) {
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    if (!['image/png', 'image/jpeg'].includes(file.type)) {
+      alert('Format harus PNG atau JPG ya, Sensei!');
+      fileInput.value = '';
+      return;
+    }
+    try {
+      const url = await KM.uploadFile(file);
+      await KM.updateCurrentUser({ [field]: url });
+      viewedUser = KM.currentUser();
+      if (previewEl) previewEl.style.backgroundImage = `url('${url}')`;
+      renderProfileHeader();
+      KM.renderNavbar('');
+    } catch (e) {
+      alert(`Gagal upload: ${e.message}`);
+    }
+    fileInput.value = '';
+  });
 }
 
 async function renderUpMateriList() {
@@ -182,18 +211,18 @@ function wireEvents() {
   const saveBtn = document.getElementById('btn-save-profile');
   if (saveBtn) {
     saveBtn.addEventListener('click', async () => {
-      const pfp = document.getElementById('input-pfp').value.trim();
-      const banner = document.getElementById('input-banner').value.trim();
       const bio = document.getElementById('input-bio').value.trim();
       saveBtn.disabled = true;
-      await KM.updateCurrentUser({ pfp, banner, bio });
+      await KM.updateCurrentUser({ bio });
       viewedUser = KM.currentUser();
-      KM.renderNavbar('');
       renderProfileHeader();
       saveBtn.disabled = false;
-      alert('Profil tersimpan~ ehehe (☆/＞u＜/）');
+      alert('Bio tersimpan~ ehehe (☆/＞u＜/）');
     });
   }
+
+  handleImageUpload(document.getElementById('input-pfp-file'), 'pfp', document.getElementById('preview-pfp'));
+  handleImageUpload(document.getElementById('input-banner-file'), 'banner', document.getElementById('preview-banner'));
 
   const logoutBtn = document.getElementById('btn-logout-2');
   if (logoutBtn) logoutBtn.addEventListener('click', KM.logout);
