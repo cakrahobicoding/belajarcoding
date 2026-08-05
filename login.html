@@ -27,6 +27,10 @@
       <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
     </div>
 
+    <div class="turnstile-wrap">
+      <div class="cf-turnstile" id="turnstile-widget"></div>
+    </div>
+
     <button class="btn btn-primary btn-block" id="btn-login">Masuk</button>
 
     <div class="auth-switch">
@@ -35,9 +39,13 @@
   </div>
 </div>
 
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="js/turnstile-config.js"></script>
 <script src="js/api-config.js"></script>
 <script src="js/app.js"></script>
 <script>
+  document.getElementById('turnstile-widget').setAttribute('data-sitekey', TURNSTILE_SITE_KEY);
+
   (async () => {
     await KM.boot('');
 
@@ -51,14 +59,16 @@
     loginBtn.addEventListener('click', async () => {
       const u = document.getElementById('username').value;
       const p = document.getElementById('password').value;
+      const turnstileToken = window.turnstile ? turnstile.getResponse() : '';
       loginBtn.disabled = true;
-      const res = await KM.login(u, p);
+      const res = await KM.login(u, p, turnstileToken);
       loginBtn.disabled = false;
       if (res.ok) {
         showMsg('Berhasil masuk! Mengalihkan... ehehe~', true);
         setTimeout(() => location.href = 'index.html', 600);
       } else {
         showMsg(res.msg, false);
+        if (window.turnstile) turnstile.reset();
       }
     });
 
