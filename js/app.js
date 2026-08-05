@@ -1,10 +1,3 @@
-/* ============================================================
-   KodeMulai — app.js
-   Inti aplikasi. Semua data (akun, komentar, up-materi) tersimpan
-   di database SQLite di VPS kamu sendiri, diakses lewat REST API
-   (lihat js/api-config.js dan folder server/).
-   ============================================================ */
-
 const KM = (() => {
   const TOKEN_KEY = 'km_token';
 
@@ -36,18 +29,18 @@ const KM = (() => {
     return data;
   }
 
-  async function register(username, password) {
+  async function register(username, password, turnstileToken) {
     try {
-      await api('/api/register', { method: 'POST', body: JSON.stringify({ username, password }) });
+      await api('/api/register', { method: 'POST', body: JSON.stringify({ username, password, turnstileToken }) });
       return { ok: true };
     } catch (e) {
       return { ok: false, msg: e.message };
     }
   }
 
-  async function login(username, password) {
+  async function login(username, password, turnstileToken) {
     try {
-      const data = await api('/api/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+      const data = await api('/api/login', { method: 'POST', body: JSON.stringify({ username, password, turnstileToken }) });
       localStorage.setItem(TOKEN_KEY, data.token);
       cachedUser = data.user;
       return { ok: true };
@@ -140,6 +133,40 @@ const KM = (() => {
     await api('/api/up-materi', { method: 'POST', body: JSON.stringify({ title, content }) });
   }
 
+  async function uploadFile(file) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const formData = new FormData();
+    formData.append('file', file);
+    let res;
+    try {
+      res = await fetch(`${API_BASE}/api/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+    } catch (e) {
+      throw new Error('Nggak bisa menghubungi server buat upload file.');
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Upload gagal.');
+    return data.url;
+  }
+
+  // ---------- DM (Pesan Langsung) ----------
+  async function getDmConversations() {
+    const data = await api('/api/dm/conversations');
+    return data.conversations;
+  }
+
+  async function getDmMessages(username) {
+    const data = await api(`/api/dm/${encodeURIComponent(username)}`);
+    return data.messages;
+  }
+
+  async function sendDm(username, text) {
+    await api(`/api/dm/${encodeURIComponent(username)}`, { method: 'POST', body: JSON.stringify({ text }) });
+  }
+
   // ---------- Util ----------
   function escapeHtml(str) {
     const div = document.createElement('div');
@@ -174,13 +201,15 @@ const KM = (() => {
     const user = currentUser();
 
     const links = [
-      { href: 'index.html', label: 'Belajar', key: 'belajar' },
-      { href: 'index.html#qa', label: 'Tanya Jawab', key: 'qa' },
+      { href: 'index.html', label: 'Home', key: 'home' },
+      { href: 'dashboard.html', label: 'Dashboard', key: 'dashboard', authOnly: true },
+      { href: 'chat.html', label: 'Chat', key: 'chat', authOnly: true },
     ];
 
-    const linksHtml = links.map(l =>
-      `<a href="${l.href}" style="${active === l.key ? 'color:var(--text)' : ''}">${l.label}</a>`
-    ).join('');
+    const linksHtml = links
+      .filter(l => !l.authOnly || user)
+      .map(l => `<a href="${l.href}" class="${active === l.key ? 'active' : ''}">${l.label}</a>`)
+      .join('');
 
     let ctaHtml;
     if (user) {
@@ -228,9 +257,10 @@ const KM = (() => {
 
   return {
     THEME_PRESETS, boot, register, login, logout, refreshCurrentUser, currentUser, updateCurrentUser,
-    getUserByName, getUsersMap,
+    getUserByName, getUsersMap, uploadFile,
     listenComments, fetchCommentsOnce, addComment, addReply,
     getUpMateriByAuthor, addUpMateri,
+    getDmConversations, getDmMessages, sendDm,
     escapeHtml, timeAgo, applyTheme, initials, renderNavbar,
   };
 })();
