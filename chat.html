@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat — KodeMulai</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="navbar-root"></div>
+
+<div id="not-logged-in" class="container" style="display:none;padding-top:60px;text-align:center;">
+  <p style="color:var(--text-dim);margin-bottom:16px;">Kamu belum masuk, Sensei. Silakan masuk dulu buat buka Chat~</p>
+  <a href="login.html" class="btn btn-primary">Masuk</a>
+</div>
+
+<div id="chat-root" class="container" style="display:none;padding-top:26px;padding-bottom:26px;">
+  <div class="chat-layout">
+    <div class="chat-list">
+      <div class="chat-list-head">💬 Chat</div>
+      <div class="chat-new">
+        <input id="chat-new-input" placeholder="Ketik username, lalu Enter...">
+        <button class="btn btn-primary btn-sm" id="chat-new-btn">Mulai</button>
+      </div>
+      <div id="chat-list-items"></div>
+    </div>
+
+    <div class="chat-window" id="chat-window">
+      <div id="chat-empty" class="chat-empty">Pilih percakapan di sebelah kiri, atau mulai chat baru dengan ketik username-nya~ (☆/＞u＜/）</div>
+
+      <div id="chat-active" style="display:none;flex-direction:column;height:100%;">
+        <div class="chat-window-head">
+          <div class="cw-title">
+            <span class="qa-avatar" id="cw-avatar" style="width:32px;height:32px;font-size:0.75rem;"></span>
+            <span id="cw-name">username</span>
+          </div>
+          <label class="chat-wallpaper-btn">
+            🖼️ Ganti Wallpaper
+            <input type="file" id="wallpaper-input" accept="image/png, image/jpeg" style="display:none;">
+          </label>
+        </div>
+
+        <div class="chat-messages" id="chat-messages"></div>
+
+        <div class="chat-input-bar">
+          <textarea id="chat-input" placeholder="Tulis pesan..." rows="1"></textarea>
+          <button class="btn btn-primary" id="chat-send-btn">Kirim</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api-config.js"></script>
+<script src="js/app.js"></script>
+<script src="js/chat.js"></script>
+</body>
+</html>
