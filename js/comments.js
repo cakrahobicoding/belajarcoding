@@ -17,6 +17,17 @@ function renderQAList(comments) {
   const list = document.getElementById('qa-list');
   if (!list) return;
 
+  // Simpan dulu form balasan yang lagi dibuka + teks yang lagi diketik,
+  // biar nggak ke-reset tiap kali polling data baru tiap 4 detik.
+  const openForm = list.querySelector('.qa-reply-form.open');
+  let preservedId = null;
+  let preservedText = '';
+  if (openForm) {
+    preservedId = openForm.id.replace('reply-form-', '');
+    const ta = openForm.querySelector('textarea');
+    if (ta) preservedText = ta.value;
+  }
+
   if (comments.length === 0) {
     list.innerHTML = `<div class="empty-state">Belum ada pertanyaan. Jadilah yang pertama bertanya, Sensei! ≧﹏≦</div>`;
     return;
@@ -62,7 +73,7 @@ function renderQAList(comments) {
               <a href="profile.html?user=${encodeURIComponent(me.username)}" class="qa-avatar" style="${qaAvatarStyle(me)}">${me.pfp ? '' : KM.initials(me.username)}</a>
               Menjawab sebagai <b>${KM.escapeHtml(me.username)}</b>${me.isAdmin ? ' <span class="badge-admin">ADMIN</span>' : ''}
             </div>
-            <textarea placeholder="Tulis jawaban kamu..."></textarea>
+            <textarea placeholder="Tulis jawaban kamu...">${preservedId === c.id ? KM.escapeHtml(preservedText) : ''}</textarea>
             <div style="display:flex;gap:8px;">
               <button class="btn btn-primary btn-sm btn-send-reply" data-id="${c.id}">Kirim Jawaban</button>
               <button class="btn btn-ghost btn-sm btn-cancel-reply" data-id="${c.id}">Batal</button>
@@ -73,6 +84,19 @@ function renderQAList(comments) {
       </div>
     `;
   }).join('');
+
+  // Buka lagi form balasan yang tadi lagi diisi, dan fokuskan kursor di akhir teks
+  if (preservedId) {
+    const form = document.getElementById(`reply-form-${preservedId}`);
+    if (form) {
+      form.classList.add('open');
+      const ta = form.querySelector('textarea');
+      if (ta) {
+        ta.focus();
+        ta.setSelectionRange(ta.value.length, ta.value.length);
+      }
+    }
+  }
 }
 
 async function initQA() {
