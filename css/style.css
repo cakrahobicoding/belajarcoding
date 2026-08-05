@@ -306,8 +306,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   background: linear-gradient(135deg, var(--user-accent), #202940);
   background-size: cover; background-position:center;
   border: 1px solid var(--border);
+  z-index: 1;
 }
-.profile-head{ display:flex; align-items:flex-end; gap: 20px; margin-top: -44px; padding: 0 20px; }
+.profile-head{ display:flex; align-items:flex-end; gap: 20px; margin-top: -44px; padding: 0 20px; position: relative; z-index: 2; }
 .profile-pfp{
   width: 96px; height: 96px; border-radius: 50%; border: 4px solid var(--bg);
   background: var(--user-accent); background-size: cover; background-position:center;
@@ -350,7 +351,4 @@ footer{ border-top: 1px solid var(--border-soft); padding: 30px 0; margin-top: 4
 footer .container{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 12px; }
 footer p{ color: var(--text-faint); font-size: 0.82rem; font-family: var(--font-mono); }
 
-.admin-badge-nav{
-  font-family: var(--font-mono); font-size: 0.7rem; background: var(--accent-js); color:#0b0e14;
-  padding: 3px 8px; border-radius: 5px; font-weight:700;
-}
+.admin-
