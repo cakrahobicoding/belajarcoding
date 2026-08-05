@@ -24,6 +24,7 @@
         <h2 id="profile-name">username <span class="admin-badge-nav" id="profile-admin-badge" style="display:none;">ADMIN</span></h2>
         <div class="profile-username" id="profile-handle">@username</div>
       </div>
+      <a href="#" id="btn-message-user" class="btn btn-ghost btn-sm" style="display:none;">💬 Kirim Pesan</a>
     </div>
     <p class="profile-bio" id="profile-bio">Belum ada bio.</p>
 
@@ -58,12 +59,18 @@
       <div class="settings-card">
         <h4>Foto Profil & Banner</h4>
         <div class="field">
-          <label for="input-pfp">URL Foto Profil</label>
-          <input id="input-pfp" placeholder="https://.../foto.jpg">
+          <label>Foto Profil (PNG/JPG)</label>
+          <div class="file-upload">
+            <div class="file-upload-preview round" id="preview-pfp"></div>
+            <input type="file" id="input-pfp-file" accept="image/png, image/jpeg">
+          </div>
         </div>
         <div class="field">
-          <label for="input-banner">URL Gambar Banner</label>
-          <input id="input-banner" placeholder="https://.../banner.jpg">
+          <label>Banner (PNG/JPG)</label>
+          <div class="file-upload">
+            <div class="file-upload-preview" id="preview-banner" style="width:100px;"></div>
+            <input type="file" id="input-banner-file" accept="image/png, image/jpeg">
+          </div>
         </div>
       </div>
 
