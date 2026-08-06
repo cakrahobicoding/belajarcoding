@@ -38,12 +38,11 @@ async function boot() {
   const targetUser = params.get('user');
   if (targetUser) {
     await openChat(targetUser.toLowerCase());
-  } else if (conversations.length > 0) {
-    await openChat(conversations[0].username);
   }
 
   wireComposer();
   wireWallpaper();
+  wireBackButton();
 }
 
 async function refreshConversationList() {
@@ -59,9 +58,12 @@ async function refreshConversationList() {
     const u = usersMap[c.username];
     return `
       <div class="chat-list-item ${activePartner === c.username ? 'active' : ''}" data-user="${c.username}">
-        <span class="qa-avatar" style="width:38px;height:38px;font-size:0.8rem;${chatAvatarStyle(u)}">${u && u.pfp ? '' : KM.initials(c.username)}</span>
-        <div style="overflow:hidden;">
-          <div class="cl-name">${KM.escapeHtml(c.username)}</div>
+        <span class="qa-avatar" style="${chatAvatarStyle(u)}">${u && u.pfp ? '' : KM.initials(c.username)}</span>
+        <div style="overflow:hidden;flex:1;">
+          <div class="cl-row">
+            <div class="cl-name">${KM.escapeHtml(c.username)}</div>
+            <div class="cl-time">${KM.timeAgo(c.lastDate)}</div>
+          </div>
           <div class="cl-preview">${KM.escapeHtml(c.lastText)}</div>
         </div>
       </div>
@@ -94,6 +96,7 @@ async function openChat(username) {
   activePartner = username;
   history.replaceState(null, '', `chat.html?user=${encodeURIComponent(username)}`);
 
+  document.querySelector('.chat-layout').classList.add('show-window');
   document.getElementById('chat-empty').style.display = 'none';
   document.getElementById('chat-active').style.display = 'flex';
   document.getElementById('cw-name').textContent = partnerUser.username;
@@ -107,6 +110,20 @@ async function openChat(username) {
 
   if (stopPolling) stopPolling();
   stopPolling = pollMessages(username);
+}
+
+function closeChat() {
+  activePartner = null;
+  if (stopPolling) stopPolling();
+  history.replaceState(null, '', 'chat.html');
+  document.querySelector('.chat-layout').classList.remove('show-window');
+  document.getElementById('chat-empty').style.display = 'flex';
+  document.getElementById('chat-active').style.display = 'none';
+  document.querySelectorAll('.chat-list-item').forEach(el => el.classList.remove('active'));
+}
+
+function wireBackButton() {
+  document.getElementById('chat-back-btn').addEventListener('click', closeChat);
 }
 
 function pollMessages(username, intervalMs = 3000) {
@@ -196,10 +213,12 @@ function renderAllUsersList() {
 
   wrap.innerHTML = others.map(u => `
     <div class="chat-list-item" data-user="${u.username}">
-      <span class="qa-avatar" style="width:38px;height:38px;font-size:0.8rem;${chatAvatarStyle(u)}">${u.pfp ? '' : KM.initials(u.username)}</span>
-      <div style="overflow:hidden;">
-        <div class="cl-name">${KM.escapeHtml(u.username)}${u.isAdmin ? ' <span class="badge-admin">ADMIN</span>' : ''}</div>
-        <div class="cl-preview">Klik buat mulai chat</div>
+      <span class="qa-avatar" style="${chatAvatarStyle(u)}">${u.pfp ? '' : KM.initials(u.username)}</span>
+      <div style="overflow:hidden;flex:1;">
+        <div class="cl-row">
+          <div class="cl-name">${KM.escapeHtml(u.username)}${u.isAdmin ? ' <span class="badge-admin">ADMIN</span>' : ''}</div>
+        </div>
+        <div class="cl-preview">Ketuk buat mulai chat</div>
       </div>
     </div>
   `).join('');
