@@ -1,3 +1,10 @@
+/* ============================================================
+   chat.js — DM (pesan langsung), realtime via polling.
+   Composer pesan sengaja dipisah dari area bubble yang di-poll,
+   jadi ketikan yang sedang berjalan tidak pernah ke-reset
+   (pelajaran dari bug yang sama di Q&A).
+   ============================================================ */
+
 let usersMap = {};
 let activePartner = null;
 let stopPolling = null;
