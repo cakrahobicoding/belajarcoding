@@ -160,13 +160,13 @@ function renderMessages(messages) {
   wrap.innerHTML = messages.map(m => {
     const mine = m.sender === me.username;
     const time = new Date(m.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    // Rapiin pesan lama yang kebetulan kegandaan baris kosong/spasi (bug Enter di keyboard HP):
-    // buang semua baris yang kosong atau isinya cuma spasi, sisain baris yang ada isinya aja.
+    // Rapiin pesan lama yang kebetulan kegandaan baris kosong/spasi (bug Enter di keyboard HP).
+    // Cakup semua jenis karakter pemisah baris (termasuk yang "tersembunyi" dari keyboard tertentu).
     const cleanText = m.text
-      .split(/\r\n|\r|\n/)
+      .split(/\r\n|\r|\n|\u2028|\u2029/)
       .map(line => line.trim())
       .filter(line => line.length > 0)
-      .join('\n')
+      .join(' ')
       .trim();
     return `
       <div class="chat-bubble ${mine ? 'mine' : ''}">
