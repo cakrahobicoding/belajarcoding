@@ -20,7 +20,7 @@
     <div class="chat-list">
       <div class="chat-list-head">💬 Chat</div>
       <div id="chat-list-items"></div>
-      <div class="chat-list-head" style="border-top:1.5px solid var(--border-soft);font-size:0.82rem;">Semua Pengguna</div>
+      <div class="chat-list-sub" style="border-top:1.5px solid var(--border-soft);padding-top:14px;">Semua Pengguna</div>
       <div id="chat-users-items"></div>
     </div>
 
@@ -30,11 +30,12 @@
       <div id="chat-active" style="display:none;flex-direction:column;height:100%;">
         <div class="chat-window-head">
           <div class="cw-title">
+            <button class="chat-back-btn" id="chat-back-btn">←</button>
             <span class="qa-avatar" id="cw-avatar" style="width:32px;height:32px;font-size:0.75rem;"></span>
             <span id="cw-name">username</span>
           </div>
           <label class="chat-wallpaper-btn">
-            🖼️ Ganti Wallpaper
+            🖼️
             <input type="file" id="wallpaper-input" accept="image/png, image/jpeg" style="display:none;">
           </label>
         </div>
