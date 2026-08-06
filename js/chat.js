@@ -1,3 +1,10 @@
+/* ============================================================
+   chat.js — DM (pesan langsung), realtime via polling.
+   Composer pesan sengaja dipisah dari area bubble yang di-poll,
+   jadi ketikan yang sedang berjalan tidak pernah ke-reset
+   (pelajaran dari bug yang sama di Q&A).
+   ============================================================ */
+
 let usersMap = {};
 let activePartner = null;
 let stopPolling = null;
@@ -153,8 +160,14 @@ function renderMessages(messages) {
   wrap.innerHTML = messages.map(m => {
     const mine = m.sender === me.username;
     const time = new Date(m.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    // Rapiin pesan lama yang kebetulan kegandaan baris kosong (bug Enter di keyboard HP)
-    const cleanText = m.text.replace(/\n{2,}/g, '\n').trim();
+    // Rapiin pesan lama yang kebetulan kegandaan baris kosong/spasi (bug Enter di keyboard HP):
+    // buang semua baris yang kosong atau isinya cuma spasi, sisain baris yang ada isinya aja.
+    const cleanText = m.text
+      .split(/\r\n|\r|\n/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .join('\n')
+      .trim();
     return `
       <div class="chat-bubble ${mine ? 'mine' : ''}">
         ${KM.escapeHtml(cleanText)}
